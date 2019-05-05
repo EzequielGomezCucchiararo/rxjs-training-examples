@@ -1,12 +1,19 @@
-// Collects values from the past as an array, and
-// emits that array only when another Observable emits.
+import { Observable } from 'rxjs';
 
-import { fromEvent, interval } from 'rxjs';
-import { buffer } from 'rxjs/operators';
+const countToTenObservable = new Observable(subscriber => {
+  let value = 0;
 
-const myButtonElement = document.getElementById('myButton');
-const myButton$ = fromEvent(myButtonElement, 'click');
-const intervalEvents = interval(1000);
-const buffered = intervalEvents.pipe(buffer(myButton$));
+  setInterval(() => {
+    if (value > 10) {
+      subscriber.complete();
+    } else {
+      subscriber.next(value++);
+    }
+  }, 1000);
+});
 
-buffered.subscribe(x => console.log(x));
+countToTenObservable.subscribe(
+  value => console.log(value),
+  err => console.log(err),
+  () => console.log('Completed!')
+);
