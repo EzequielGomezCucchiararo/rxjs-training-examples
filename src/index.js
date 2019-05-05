@@ -12,8 +12,8 @@ const countToTenObservable = new Observable(subscriber => {
   }, 1000);
 });
 
-countToTenObservable.subscribe(
-  value => console.log(value),
-  err => console.log(err),
-  () => console.log('Completed!')
-);
+countToTenObservable.subscribe({
+  next(value) { console.log(value); },
+  error(err) { console.error('Something wrong occurred: ' + err); },
+  complete() { console.log('Done!'); }
+});
