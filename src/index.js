@@ -1,15 +1,12 @@
-import { fromEvent } from 'rxjs';
-import { map, scan, tap } from 'rxjs/operators';
+// Collects values from the past as an array, and
+// emits that array only when another Observable emits.
+
+import { fromEvent, interval } from 'rxjs';
+import { buffer } from 'rxjs/operators';
 
 const myButtonElement = document.getElementById('myButton');
 const myButton$ = fromEvent(myButtonElement, 'click');
+const intervalEvents = interval(1000);
+const buffered = intervalEvents.pipe(buffer(myButton$));
 
-myButton$
-  .pipe(
-    map(() => 1),
-    tap(() => console.log('Button clicked!')),
-    scan((acc, current) => acc + current)
-  )
-  .subscribe(count => {
-    console.log(count);
-  });
+buffered.subscribe(x => console.log(x));
