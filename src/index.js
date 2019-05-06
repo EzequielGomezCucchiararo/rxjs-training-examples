@@ -1,21 +1,23 @@
-import { Observable } from 'rxjs';
+import { fromEvent, from } from 'rxjs';
+import { map, tap, filter, distinctUntilChanged, debounceTime, switchMap } from 'rxjs/operators';
 
-const countToTenObservable = new Observable(subscriber => {
-  let value = 0;
+const inputElement = document.getElementById('search');
 
-  setInterval(() => {
-    if (value > 10) {
-      subscriber.complete();
-    } else if (value > 5) {
-      subscriber.error('Error!');
-    } else {
-      subscriber.next(value++);
-    }
-  }, 1000);
-});
+const searchGithub = (query) =>
+  fetch(`https://api.github.com/search/users?q=${query}`)
+    .then(data => data.json());
 
-countToTenObservable.subscribe({
-  next(value) { console.log(value); },
-  error(err) { console.error('Something wrong occurred: ' + err); },
-  complete() { console.log('Done!'); }
+let input$ = fromEvent(inputElement, 'input');
+
+input$.pipe(
+  debounceTime(350),
+  map(e => e.target.value),
+  distinctUntilChanged(),
+  filter(query => query.length >= 2 || query.length === 0),
+  switchMap(value => value ?
+    from(searchGithub(value)) : from(Promise.resolve({items: []}))
+  ),
+  map(response => response.items.slice(0, 5)),
+).subscribe(items =>  {
+  items.forEach(item => console.log(item.login));
 });
