@@ -6,6 +6,8 @@ const countToTenObservable = new Observable(subscriber => {
   setInterval(() => {
     if (value > 10) {
       subscriber.complete();
+    } else if (value > 5) {
+      subscriber.error('Error!');
     } else {
       subscriber.next(value++);
     }
