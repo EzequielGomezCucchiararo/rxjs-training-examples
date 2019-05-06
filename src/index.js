@@ -1,23 +1,41 @@
-import { fromEvent, from } from 'rxjs';
-import { map, tap, filter, distinctUntilChanged, debounceTime, switchMap } from 'rxjs/operators';
+// --- EXAMPLE 1: PURE FUNCTIONS ---
 
-const inputElement = document.getElementById('search');
+// VANILLA:
+let count = 0;
 
-const searchGithub = (query) =>
-  fetch(`https://api.github.com/search/users?q=${query}`)
-    .then(data => data.json());
+document.addEventListener(
+  'click',
+  () => console.log(`Clicked ${++count} times`)
+);
 
-let input$ = fromEvent(inputElement, 'input');
+// RXJS
+import { fromEvent } from 'rxjs';
+import { scan } from 'rxjs/operators';
 
-input$.pipe(
-  debounceTime(350),
-  map(e => e.target.value),
-  distinctUntilChanged(),
-  filter(query => query.length >= 2 || query.length === 0),
-  switchMap(value => value ?
-    from(searchGithub(value)) : from(Promise.resolve({items: []}))
-  ),
-  map(response => response.items.slice(0, 5)),
-).subscribe(items =>  {
-  items.forEach(item => console.log(item.login));
+fromEvent(document, 'click')
+  .pipe(scan(count => count + 1, 0))
+  .subscribe(count => console.log(`Clicked ${count} times`));
+
+// --- EXAMPLE 2: FLOW ---
+// VANILLA:
+let count = 0;
+let rate = 1000;
+let lastClick = Date.now() - rate;
+document.addEventListener('click', () => {
+  if (Date.now() - lastClick >= rate) {
+    console.log(`Clicked ${++count} times`);
+    lastClick = Date.now();
+  }
 });
+
+// RXJS
+import { fromEvent } from 'rxjs';
+import { throttleTime, scan } from 'rxjs/operators';
+
+fromEvent(document, 'click')
+  .pipe(
+    throttleTime(1000),
+    scan(count => count + 1, 0)
+  )
+  .subscribe(count => console.log(`Clicked ${count} times`));
+
