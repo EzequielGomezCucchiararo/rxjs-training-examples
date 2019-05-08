@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "sripts": {
-    "webpack": "webpack --watch"
+    "start": "webpack --watch"
   },
   "dependencies": {
     "babel-loader": "^8.0.5",
